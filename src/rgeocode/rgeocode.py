@@ -1,4 +1,5 @@
 import os
+from os.path import expanduser
 import csv
 import sys
 from sys import platform
@@ -17,6 +18,8 @@ FILE_ONE = "allCountries.zip"
 FILE_TWO = "countryInfo.txt"
 FILE_THREE = "admin1CodesASCII.txt"
 FILE_FOUR = "admin2Codes.txt"
+LOCATION = ''
+
 
 if sys.version_info[0] == 3:
 	import urllib.request
@@ -25,13 +28,11 @@ elif sys.version_info[0] < 3:
 
 def connectdatabase():
 	global conn
+	global LOCATION
 	try:
-		conn = sqlite3.connect(os.path.join(os.getcwd(), os.path.dirname(__file__), 'geo.db'))
+		conn = sqlite3.connect(os.path.join(LOCATION, 'geo.db'))
 	except sqlite3.Error as e:
 		status='Error in reverse geocode: '+str(e)
-	finally:
-		if conn:
-			print('Connected to geo database')
 
 def creategeotable():
 	try:
@@ -52,23 +53,23 @@ def creategeotable():
 	return(status)
 
 def cleanup():
+	global LOCATION
 	if conn is not None:
 		conn.close()
 
-	if os.path.exists(os.path.join(os.getcwd(), os.path.dirname(__file__), 'allCountries.txt')):
-		os.remove('allCountries.txt')
+	if os.path.exists(os.path.join(LOCATION, 'allCountries.txt')):
+		os.remove(os.path.join(LOCATION, 'allCountries.txt'))
 
-	if os.path.exists(os.path.join(os.getcwd(), os.path.dirname(__file__), 'geonamesdata.csv')):
-		os.remove('geonamesdata.csv')
+	if os.path.exists(os.path.join(LOCATION, 'geonamesdata.csv')):
+		os.remove(os.path.join(LOCATION, 'geonamesdata.csv'))
 
-	if os.path.exists(os.path.join(os.getcwd(), os.path.dirname(__file__), 'allCountries.zip')):
-		os.remove('allCountries.zip')
-	print('Database connection closed ...')
-	print('Program finished execution.')
-
+	if os.path.exists(os.path.join(LOCATION, 'allCountries.zip')):
+		os.remove(os.path.join(LOCATION, 'allCountries.zip'))
+	
 def downloadfile(filename, savetofile):
 	global BASE_URL
-	print('Downloading ' + filename + ' from geonames.org')
+	global LOCATION
+	savetofile = os.path.join(LOCATION, savetofile)
 	if sys.version_info[0] == 3:
 		try:
 			urllib.request.urlretrieve(BASE_URL + filename, savetofile)
@@ -85,12 +86,14 @@ def downloadfile(filename, savetofile):
 
 def do_check():
 	global conn
+	global LOCATION
+	downloadflag = 0
 	if sys.version_info[0] < 3 and sys.version_info[1] < 5:
 		status = 'Python version should be greater than 2.5'
 		return(status)
 
 	if platform == "win32":
-		if not os.path.exists(os.path.join(os.getcwd(), os.path.dirname(__file__), 'sqlite3.exe')):
+		if not os.path.exists(os.path.join(LOCATION, 'sqlite3.exe')):
 			status='sqlite3 not found.'
 			return(status)
 		else:
@@ -113,42 +116,42 @@ def do_check():
 		row = cursor.fetchone()
 		if row is None:
 			creategeotable()
+			downloadflag = 1
 		else:
 			status = 'Start reverse geocode - geotable already exists ...'
-			return(status)
 	except sqlite3.Error as e:
 	  	status = 'Error in reverse geocode: ' + str(e)
 	  	return(status)
 
-	if not os.path.exists(os.path.join(os.getcwd(), os.path.dirname(__file__), 'allCountries.zip')):
+	if not os.path.exists(os.path.join(LOCATION, 'allCountries.zip')) and downloadflag == 1:
 		status = downloadfile(FILE_ONE, 'allCountries.zip')
 		if 'Error downloading file: ' in status:
 			return(status)
-		with zipfile.ZipFile('allCountries.zip', 'r') as z:
-			z.extractall(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+		with zipfile.ZipFile(os.path.join(LOCATION, 'allCountries.zip'), 'r') as z:
+			z.extractall(LOCATION)
 
-		f=open('geonamesdata.csv', 'w', encoding='UTF-8')
-		print('Preparing data ...')
+		f=open(os.path.join(LOCATION, 'geonamesdata.csv'), 'w', encoding='UTF-8')
 
-		with open('allCountries.txt', 'r', encoding="utf8") as source:
+		with open(os.path.join(LOCATION, 'allCountries.txt'), 'r', encoding="utf8") as source:
 			reader = csv.reader(source, delimiter='\t')
 			for r in reader:
 				f.write((r[2]+ '|' + r[4] + '|' + r[5] + '|' + r[8] + '|' + r[10] + '|' + r[11]+'\n'))
 			f.close()
 
-		subprocess.call(["sqlite3", "geo.db","-separator", "|" ,".import geonamesdata.csv geotable"])
+		subprocess.call([os.path.join(LOCATION, "sqlite3"), os.path.join(LOCATION, "geo.db"), "-separator", "|" ,".import " +os.path.join(LOCATION, "geonamesdata.csv")+" geotable"])
 
-		print('Populating geotable done...')
-		
-	if not os.path.exists(os.path.join(os.getcwd(), os.path.dirname(__file__), 'countries.tsv')):
+
+	if not os.path.exists(os.path.join(LOCATION, 'countries.tsv')):
 		status = downloadfile(FILE_TWO, 'countries.tsv')
 		if 'Error downloading file: ' in status:
 			return(status)
-	if not os.path.exists(os.path.join(os.getcwd(), os.path.dirname(__file__), 'admin1.tsv')):
+
+	if not os.path.exists(os.path.join(LOCATION, 'admin1.tsv')):
 		status = downloadfile(FILE_THREE, 'admin1.tsv')
 		if 'Error downloading file: ' in status:
 			return(status)
-	if not os.path.exists(os.path.join(os.getcwd(), os.path.dirname(__file__), 'admin2.tsv')):
+
+	if not os.path.exists(os.path.join(LOCATION, 'admin2.tsv')):
 		status = downloadfile(FILE_FOUR, 'admin2.tsv')
 		if 'Error downloading file: ' in status:
 			return(status)
@@ -156,19 +159,19 @@ def do_check():
 	return(status)
         
 def geo_dictionary():
-	with open(os.path.join(os.getcwd(), os.path.dirname(__file__), 'countries.tsv'), 'r', encoding="utf8") as source:
+	with open(os.path.join(LOCATION, 'countries.tsv'), 'r', encoding="utf8") as source:
 		reader = csv.reader(source, delimiter='\t')
 		for row in reader:
 			code = row[0]
 			name = row[4]
 			countries[code] = name
-	with open(os.path.join(os.getcwd(), os.path.dirname(__file__), 'admin1.tsv'), 'r', encoding="utf8") as source:
+	with open(os.path.join(LOCATION, 'admin1.tsv'), 'r', encoding="utf8") as source:
 		reader = csv.reader(source, delimiter='\t')
 		for row in reader:
 			code = row[0]
 			name = row[1]
 			admin1[code] = name
-	with open(os.path.join(os.getcwd(), os.path.dirname(__file__), 'admin2.tsv'), 'r', encoding="utf8") as source:
+	with open(os.path.join(LOCATION, 'admin2.tsv'), 'r', encoding="utf8") as source:
 		reader = csv.reader(source, delimiter='\t')
 		for row in reader:
 			code = row[0]
@@ -250,39 +253,54 @@ def get_location(latitude, longitude):
 	return(locationlist)
 
 def start_rgeocode(latitude, longitude):
+	global LOCATION
+	LOCATIONDICT = sys._getframe(1).f_globals
+	try:
+		LOCATION = os.path.dirname(LOCATIONDICT['__file__'])
+	except KeyError:
+		LOCATION = expanduser("~")
+	
+	if platform == "win32":
+		LOCATION = LOCATION + '\\'
+		LOCATION = LOCATION.replace('\\', '\\\\')
+
 	if isinstance(latitude, float) and isinstance(longitude, float):
 		status=do_check()
 	else:
-		status='Function parameters should be of type<float> only'
+		status='Invalid data type'
 		
 	if 'Start reverse geocode' in status:
 		if 'Error in reverse geocode: ' in status:
-			print(status)
+			return(status)
 		else:
 			geo_dictionary()
 
-			status='Reverse geocoding (' + str(latitude) + ', ' + str(longitude) +'): '
 			locationlist=get_location(latitude, longitude)
 			
-			print(status)
-			print(locationlist)
+			cleanup()
+			return(locationlist)
 	else:
-		print(status)
-	cleanup()
+		cleanup()
+		return(status)
+	
 
 if __name__ == '__main__':
 	latitude = 12.9751
 	longitude = 77.5964
-	start_rgeocode(latitude, longitude)
-
+	location = start_rgeocode(latitude, longitude)
+	print(location)
+	
 	latitude = -33.852222
 	longitude = 151.210556
-	start_rgeocode(latitude, longitude)
+	location = start_rgeocode(latitude, longitude)
+	print(location)
 
 	latitude = 40.689247
 	longitude = -74.044502
-	start_rgeocode(latitude, longitude)
+	location = start_rgeocode(latitude, longitude)
+	print(location)
 
 	latitude = -25.695230
 	longitude = -54.436718
-	start_rgeocode(latitude, longitude)
+	location = start_rgeocode(latitude, longitude)
+	print(location)
