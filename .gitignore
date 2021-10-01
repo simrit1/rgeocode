@@ -43,4 +43,3 @@ tests
 r_geocode.egg-info
 pyproject.toml
 setup.py
-.gitignore
