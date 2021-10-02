@@ -25,7 +25,7 @@ if sys.version_info[0] == 3:
 	import urllib.request
 elif sys.version_info[0] < 3:
 	import urllib
-
+	
 def connectdatabase():
 	global conn
 	global LOCATION
@@ -138,8 +138,15 @@ def do_check():
 				f.write((r[2]+ '|' + r[4] + '|' + r[5] + '|' + r[8] + '|' + r[10] + '|' + r[11]+'\n'))
 			f.close()
 
-		subprocess.call([os.path.join(LOCATION, "sqlite3"), os.path.join(LOCATION, "geo.db"), "-separator", "|" ,".import " +os.path.join(LOCATION, "geonamesdata.csv")+" geotable"])
-
+		#Enclosing location of geonamesdata.csv file in quotes allows for spaces in file path
+		NL = '"' + LOCATION + "geonamesdata.csv" +'"' 
+		
+		subprocess.call([
+		os.path.join(LOCATION, "sqlite3"), 
+		os.path.join(LOCATION, "geo.db"), 
+		"-separator", "|" ,
+		".import "+ NL + " geotable"
+		])
 
 	if not os.path.exists(os.path.join(LOCATION, 'countries.tsv')):
 		status = downloadfile(FILE_TWO, 'countries.tsv')
@@ -263,7 +270,7 @@ def start_rgeocode(latitude, longitude):
 	if platform == "win32":
 		LOCATION = LOCATION + '\\'
 		LOCATION = LOCATION.replace('\\', '\\\\')
-
+	
 	if isinstance(latitude, float) and isinstance(longitude, float):
 		status=do_check()
 	else:
