@@ -20,7 +20,7 @@ rgeocode uses data from [geonames.org](https://www.geonames.org/)
      
     >>> print(location)
         
-    ['Statue of Liberty', 'New York County', 'New York', 'United States']
+    ['Statue of Liberty', 'New York', 'New York County', 'United States']
 
 
 ## Requirements

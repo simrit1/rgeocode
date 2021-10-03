@@ -94,13 +94,16 @@ def do_check():
 
 	if platform == "win32":
 		if not os.path.exists(os.path.join(LOCATION, 'sqlite3.exe')):
-			status='sqlite3 not found.'
+			status='sqlite3.exe not found.'
 			return(status)
 		else:
 			connectdatabase()
 	else:
-		connectdatabase()
-
+		if not os.path.exists(os.path.join(LOCATION, 'sqlite3')):
+			status='sqlite3 not found.'
+			return(status)
+		else:
+			connectdatabase()
 	
 	sql="""SELECT
 	NAME
@@ -139,7 +142,10 @@ def do_check():
 			f.close()
 
 		#Enclosing location of geonamesdata.csv file in quotes allows for spaces in file path
-		NL = '"' + LOCATION + "geonamesdata.csv" +'"' 
+		if platform == 'win32':
+			NL = '"' + LOCATION + "geonamesdata.csv" + '"' 
+		else:
+			NL = '"' + LOCATION + '/' + "geonamesdata.csv" + '"'  
 		
 		subprocess.call([
 		os.path.join(LOCATION, "sqlite3"), 
@@ -241,12 +247,12 @@ def get_location(latitude, longitude):
 			locationlist.append(geolocation[placeindex]['locality'])
 		except Exception as e:
 			locationlist.append('')
-		try:	
-			locationlist.append(admin2[geolocation[placeindex]['city_code']])
-		except Exception as e:
-			locationlist.append('')
 		try:
 			locationlist.append(admin1[geolocation[placeindex]['state_code']])
+		except Exception as e:
+			locationlist.append('')
+		try:	
+			locationlist.append(admin2[geolocation[placeindex]['city_code']])
 		except Exception as e:
 			locationlist.append('')
 		try:
