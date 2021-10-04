@@ -1,0 +1,56 @@
+Metadata-Version: 2.1
+Name: r-geocode
+Version: 0.1.1
+Summary: A sqlite based offline reverse geocoder
+Home-page: https://github.com/playdust/rgeocode
+Author: Venkat
+Author-email: contactplaydust@gmail.com
+License: MIT
+Project-URL: Source, https://github.com/playdust/rgeocode/tree/main/src/rgeocode
+Project-URL: Bug Tracker, https://github.com/playdust/rgeocode/issues
+Project-URL: Say Thanks!, https://www.geonames.org/
+Keywords: reverse,geocode,sqlite,offline,geonames
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=2.5
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# rgeocode
+#### Offline reverse geocoder
+
+rgeocode accepts a geographic coordinate pair (latitude and longitude) and returns a list containing the name of:
+
+*	A geographical point
+*	First administrative unit
+*	Second administrative unit
+*	Country
+
+rgeocode uses data from [geonames.org](https://www.geonames.org/)
+
+## Install
+
+    pip install r-geocode
+    
+    >>> from rgeocode.rgeocode import start_rgeocode
+     
+    >>> location = start_rgeocode(40.689247, -74.044502)
+     
+    >>> print(location)
+        
+    ['Statue of Liberty', 'New York', 'New York County', 'United States']
+
+
+## Requirements
+
+*	sqlite3
+*	python version >= 2.5
+
+## First run
+
+The first time rgeocode is run, it attempts to download the required files (*countryInfo.txt*, 
+*admin1CodesASCII.txt*, *admin2Codes.txt*) from geonames.org. The three files have a combined size of ~1.6GB. After the download completes, the required data is copied to a local sqlite3 database. After the database is created, the downloaded files are deleted. rgeocode creates - *admin1.tsv, admin2.tsv, countries.tsv, and geo.db.* The combined size of these files is ~660MB. Subsequent calls to *start_rgeocode()* reference the data in these files. The files are created in the same folder as the script in which *start_rgeocode()* is imported. When *start_rgeocode()* is called from the interactive shell the files are downloaded and created in the home path.
+
+
