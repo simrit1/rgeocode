@@ -36,10 +36,10 @@
 ehthumbs.db
 Thumbs.db
 
-# rgeocode #
+# rgpocode #
 #####################
 dist
 tests
-r_geocode.egg-info
+r_gpocode.egg-info
 pyproject.toml
 setup.py
