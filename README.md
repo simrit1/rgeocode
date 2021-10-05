@@ -13,7 +13,7 @@ rgeocode uses data from [geonames.org](https://www.geonames.org/)
 ## Install
 
     pip install r-geocode
-    
+   
     >>> from rgeocode.rgeocode import start_rgeocode
      
     >>> location = start_rgeocode(40.689247, -74.044502)
@@ -31,4 +31,20 @@ rgeocode uses data from [geonames.org](https://www.geonames.org/)
 ## First run
 
 The first time rgeocode is run, it attempts to download the required files (*countryInfo.txt*, 
-*admin1CodesASCII.txt*, *admin2Codes.txt*) from geonames.org. The three files have a combined size of ~1.6GB. After the download completes, the required data is copied to a local sqlite3 database. After the database is created, the downloaded files are deleted. rgeocode creates - *admin1.tsv, admin2.tsv, countries.tsv, and geo.db.* The combined size of these files is ~660MB. Subsequent calls to *start_rgeocode()* reference the data in these files. The files are created in the same folder as the script in which *start_rgeocode()* is imported. When *start_rgeocode()* is called from the interactive shell the files are downloaded and created in the home path.
+*admin1CodesASCII.txt*, *admin2Codes.txt*) from geonames.org. The three files have a combined size of ~1.6GB. After the download completes, the required data is copied to a local sqlite3 database. After the database is created, the downloaded files are deleted. rgeocode creates - *admin1.tsv, admin2.tsv, countries.tsv, and geo.db.* The combined size of these files is ~600MB. Subsequent calls to *start_rgeocode()* reference the data in these files. The files are created in the same folder as the script in which *start_rgeocode()* is imported. When *start_rgeocode()* is called from the interactive shell the files are downloaded and created in the home path.
+
+##  Options
+
+You can reduce the size of the database *(geo.db)* if you need to reverse geocode for locations only in specific countries by calling *filter_rgeocode(stringList)*. 
+
+     codelist = ['IN', 'US']
+     
+     status = filter_rgeocode(codelist)
+     
+     print(status)
+
+To retrive ISO country codes:
+
+     codes = country_code()
+                                                                                                                 
+     print(codes)                                                                                         

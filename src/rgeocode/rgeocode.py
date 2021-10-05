@@ -20,7 +20,6 @@ FILE_THREE = "admin1CodesASCII.txt"
 FILE_FOUR = "admin2Codes.txt"
 LOCATION = ''
 
-
 if sys.version_info[0] == 3:
 	import urllib.request
 elif sys.version_info[0] < 3:
@@ -31,8 +30,11 @@ def connectdatabase():
 	global LOCATION
 	try:
 		conn = sqlite3.connect(os.path.join(LOCATION, 'geo.db'))
+		status = 'Database connected'
 	except sqlite3.Error as e:
 		status='Error in reverse geocode: '+str(e)
+
+	return(status)
 
 def creategeotable():
 	try:
@@ -46,10 +48,12 @@ def creategeotable():
         )"""
 		cursor = conn.cursor()
 		cursor.execute(sql)
+		conn.commit()
 		status = 'geotable created'
 	except sqlite3.Error as e:
 		if not 'table already exists' in str(e):
 			status='Error occured in creating table geotable: '+ str(e)
+
 	return(status)
 
 def cleanup():
@@ -96,14 +100,12 @@ def do_check():
 		if not os.path.exists(os.path.join(LOCATION, 'sqlite3.exe')):
 			status='sqlite3.exe not found.'
 			return(status)
-		else:
-			connectdatabase()
+		connectdatabase()
 	else:
 		if not os.path.exists(os.path.join(LOCATION, 'sqlite3')):
 			status='sqlite3 not found.'
 			return(status)
-		else:
-			connectdatabase()
+		connectdatabase()
 	
 	sql="""SELECT
 	NAME
@@ -141,11 +143,8 @@ def do_check():
 				f.write((r[2]+ '|' + r[4] + '|' + r[5] + '|' + r[8] + '|' + r[10] + '|' + r[11]+'\n'))
 			f.close()
 
-		#Enclosing location of geonamesdata.csv file in quotes allows for spaces in file path
-		if platform == 'win32':
-			NL = '"' + LOCATION + "geonamesdata.csv" + '"' 
-		else:
-			NL = '"' + LOCATION + '/' + "geonamesdata.csv" + '"'  
+		#Enclosing LOCATION quotes allows for spaces in file path
+		NL = '"' + LOCATION  + '/' + "geonamesdata.csv" + '"' 
 		
 		subprocess.call([
 		os.path.join(LOCATION, "sqlite3"), 
@@ -176,8 +175,10 @@ def geo_dictionary():
 		reader = csv.reader(source, delimiter='\t')
 		for row in reader:
 			code = row[0]
-			name = row[4]
-			countries[code] = name
+			if not '#' in code:
+				name = row[4]
+				countries[code] = name
+	countries.popitem()
 	with open(os.path.join(LOCATION, 'admin1.tsv'), 'r', encoding="utf8") as source:
 		reader = csv.reader(source, delimiter='\t')
 		for row in reader:
@@ -265,18 +266,90 @@ def get_location(latitude, longitude):
 
 	return(locationlist)
 
-def start_rgeocode(latitude, longitude):
+def country_code():
+	country_code_dictionary={}
+	try:
+		with open(os.path.join(LOCATION, 'countries.tsv'), 'r', encoding="utf8") as source:
+			reader = csv.reader(source, delimiter='\t')
+			for row in reader:
+				code = row[0]
+				if not '#' in code:
+					name = row[4]
+					country_code_dictionary[code] = name
+		country_code_dictionary.popitem()
+	except FileNotFoundError:
+		status = 'File not found countries.tsv'
+		return(status)
+	return(country_code_dictionary)
+
+def user_cwd(LOCATIONDICT):
 	global LOCATION
 	LOCATIONDICT = sys._getframe(1).f_globals
 	try:
 		LOCATION = os.path.dirname(LOCATIONDICT['__file__'])
 	except KeyError:
-		LOCATION = expanduser("~")
+		#LOCATION is set to home path when start_rgeocode is run from interactive shell
+		LOCATION = expanduser("~") 
 	
 	if platform == "win32":
 		LOCATION = LOCATION + '\\'
 		LOCATION = LOCATION.replace('\\', '\\\\')
+
+	if len(LOCATION) == 0:			
+		LOCATION = os.getcwd()		#LOCATION is set to cwd when rgeocode.py is main
+	return(LOCATION)
+
+def filter_rgeocode(codelist):
+	LOCATIONDICT = sys._getframe(1).f_globals
+	LOCATION = user_cwd(LOCATIONDICT)
+	country_code_dictionary = country_code()
+	if country_code_dictionary == 'File not found countries.tsv':
+		status = 'File not found countries.tsv'
+		return(status)
+
+	connectdatabase()
+	dictionary_keys = country_code_dictionary.keys()
+
+	for key in range(len(codelist)):
+		if codelist[key] not in dictionary_keys:
+			status = 'Invalid country code: ' + str(codelist[key])
+			return(status)
+
+	code="'"
+	delim = "',"
+	for i in range(len(codelist)):
+		code = code + "'" + str(codelist[i]) + delim
 	
+	code = code[1:-1]
+
+	sql="""DELETE
+	FROM geotable
+	WHERE geo_countrycode NOT IN (""" + code +");"
+	
+	try: 
+		cursor = conn.execute(sql)
+		conn.commit()
+		conn.execute("vacuum")	#This is to reduce file size of geo.db from ~600MB
+		status = 'Database filtered: '
+	except sqlite3.Error as e:
+		status = 'Error in filter_rgeocode delete ' + str(e)
+		
+	if status == 'Database filtered: ':
+		sql="SELECT changes();"
+		try: 
+			cursor = conn.execute(sql)
+			count = cursor.fetchone()
+			status = status + 'Deleted ' + str(count[0]) + ' rows.'
+		except sqlite3.Error as e:
+		  	status = 'Error in filter_rgeocode changes() ' + str(e)
+		
+	cleanup()
+	return(status)
+
+def start_rgeocode(latitude, longitude):
+	LOCATIONDICT = sys._getframe(1).f_globals
+	LOCATION = user_cwd(LOCATIONDICT)
+
 	if isinstance(latitude, float) and isinstance(longitude, float):
 		status=do_check()
 	else:
@@ -296,7 +369,6 @@ def start_rgeocode(latitude, longitude):
 		cleanup()
 		return(status)
 	
-
 if __name__ == '__main__':
 	latitude = 12.9751
 	longitude = 77.5964
