@@ -58,4 +58,4 @@ To retrieve ISO country codes:
      
      {'AD': 'Andorra', 'AE': 'United Arab Emirates', ... , 'ZW': 'Zimbabwe', 'CS': 'Serbia and Montenegro'}
 
-Other pacakages: [Reverse geocoding postal codes](https://pypi.org/project/r-gpocode/)
+Other projects: [Reverse geocoding postal codes](https://pypi.org/project/r-gpocode/)

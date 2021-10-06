@@ -178,7 +178,6 @@ def geo_dictionary():
 			if not '#' in code:
 				name = row[4]
 				countries[code] = name
-	countries.popitem()
 	with open(os.path.join(LOCATION, 'admin1.tsv'), 'r', encoding="utf8") as source:
 		reader = csv.reader(source, delimiter='\t')
 		for row in reader:
@@ -276,7 +275,6 @@ def country_code():
 				if not '#' in code:
 					name = row[4]
 					country_code_dictionary[code] = name
-		country_code_dictionary.popitem()
 	except FileNotFoundError:
 		status = 'File not found countries.tsv'
 		return(status)

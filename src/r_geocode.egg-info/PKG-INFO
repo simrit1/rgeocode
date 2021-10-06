@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: r-geocode
-Version: 0.1.7
+Version: 0.1.8
 Summary: A sqlite based offline reverse geocoder
 Home-page: https://github.com/playdust/rgeocode
 Author: Venkat
@@ -78,5 +78,5 @@ To retrieve ISO country codes:
      
      {'AD': 'Andorra', 'AE': 'United Arab Emirates', ... , 'ZW': 'Zimbabwe', 'CS': 'Serbia and Montenegro'}
 
-Other pacakages: [Reverse geocoding postal codes](https://pypi.org/project/r-gpocode/)
+Other projects: [Reverse geocoding postal codes](https://pypi.org/project/r-gpocode/)
 
