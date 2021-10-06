@@ -284,7 +284,6 @@ def country_code():
 
 def user_cwd(LOCATIONDICT):
 	global LOCATION
-	LOCATIONDICT = sys._getframe(1).f_globals
 	try:
 		LOCATION = os.path.dirname(LOCATIONDICT['__file__'])
 	except KeyError:

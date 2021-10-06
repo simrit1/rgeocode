@@ -14,11 +14,11 @@ rgeocode uses data from [geonames.org](https://www.geonames.org/)
 
     pip install r-geocode
    
-    >>> from rgeocode.rgeocode import start_rgeocode
+    >>>   from rgeocode import start_rgeocode
      
-    >>> location = start_rgeocode(40.689247, -74.044502)
+    >>>   location = start_rgeocode(40.689247, -74.044502)
      
-    >>> print(location)
+    >>>   print(location)
         
     ['Statue of Liberty', 'New York', 'New York County', 'United States']
 
@@ -35,16 +35,27 @@ The first time rgeocode is run, it attempts to download the required files (*cou
 
 ##  Options
 
-You can reduce the size of the database *(geo.db)* if you need to reverse geocode for locations only in specific countries by calling *filter_rgeocode(stringList)*. 
+If you need to reverse geocode for locations only in specific countries, you can reduce the size of the database *(geo.db)* by calling *filter_rgeocode(stringList)*. 
 
-     codelist = ['IN', 'US']
+     >>>  from rgeocode import filter_rgeocode
      
-     status = filter_rgeocode(codelist)
+     >>>  codelist = ['IN', 'US']
      
-     print(status)
+     >>>  status = filter_rgeocode(codelist)
+     
+     >>>  print(status)
+     
+     Database filtered: Deleted 9291519 rows.
 
-To retrive ISO country codes:
 
-     codes = country_code()
+To retrieve ISO country codes:
+
+     >>>  from rgeocode import country_code
+     
+     >>>  codes = country_code()
                                                                                                                  
-     print(codes)                                                                                         
+     >>>  print(codes)
+     
+     {'AD': 'Andorra', 'AE': 'United Arab Emirates', ... , 'ZW': 'Zimbabwe', 'CS': 'Serbia and Montenegro'}
+
+Other pacakages: [Reverse geocoding postal codes](https://pypi.org/project/r-gpocode/)

@@ -8,4 +8,4 @@ src/r_geocode.egg-info/dependency_links.txt
 src/r_geocode.egg-info/requires.txt
 src/r_geocode.egg-info/top_level.txt
 src/rgeocode/__init__.py
-src/rgeocode/rgeocode.py
+src/rgeocode/main.py
