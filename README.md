@@ -8,7 +8,7 @@ rgeocode accepts a geographic coordinate pair (latitude and longitude) and retur
 *	Second administrative unit
 *	Country
 
-Credits: rgeocode uses data sourced from [geonames.org](https://www.geonames.org/)(URL: https://www.geonames.org/) and is used under a CC 4.0 license [(link to Creative Commons 4.0)](https://creativecommons.org/licenses/by/4.0/)
+Credits: rgeocode uses data sourced from https://www.geonames.org/ and is used under a CC 4.0 license [(link to Creative Commons 4.0)](https://creativecommons.org/licenses/by/4.0/)
 
 ## Install
 
