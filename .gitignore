@@ -43,4 +43,8 @@ tests
 r_geocode.egg-info
 pyproject.toml
 setup.py
-r_geocode.egg-info
+dependency_links.txt
+PKG-INFO
+requires.txt
+SOURCES.txt
+top_level.txt
