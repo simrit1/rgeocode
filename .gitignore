@@ -40,7 +40,7 @@ Thumbs.db
 #####################
 dist
 tests
-r_geocode.egg-info
+*/r_geocode.egg-info
 pyproject.toml
 setup.py
 dependency_links.txt
